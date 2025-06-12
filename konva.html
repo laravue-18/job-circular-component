@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Circular Component</title>
+  <link rel="stylesheet" href="font.css">
+
+  <style>
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .luka-circular-component {
+      width: 600px;
+      height: 600px;
+      position: relative;
+    }
+    .luka-circular-component .center-content {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 284px;
+      height: 284px;
+      border-radius: 50%;
+      /* background: linear-gradient(205.41deg, #BE6786 30.27%, #994277 76.81%); */
+      background: url(./assets/center.png);
+    }
+  </style>
+</head>
+<body>
+  <div class="luka-circular-component">
+    <div id="lukaCircularCanvas"></div>
+    <div class="center-content"></div>
+  </div>
+  
+  <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+  <script>
+    const cx = 300, cy = 300;
+    const outerRadius = 232;
+    const outerThickness = 12;
+    const outerAnglePerChar = 11 / 230;
+    const outerStrings = ['HR & Team', 'Akademie', 'Labor', 'Abrechnung', 'Praxisausstattung', 'Finanzierung', 'Bewerbungsmanagement'];
+    const outerArcAngle = 78 / 230;
+
+    const baseRadius = 210;
+    const thickness = 60;
+    const offset = 30;
+    const anglePerChar = 10 / 180; // font-size(width) / radius
+    
+    const arcs = [
+      {
+        start: -10,
+        end: 66,
+        color: '#E9A2AB',
+        hoverColor: '#E9A2AB',
+        isHover: false,
+        text: "Mitarbeiter schulen"
+      },
+      {
+        start: 67,
+        end: 165,
+        color: '#DD8E98',
+        hoverColor: '#DD8E98',
+        isHover: false,
+        text: 'Buchha I tung und Finanzen'
+      },
+      {
+        start: 166,
+        end: 269,
+        color: '#E77584',
+        hoverColor: '#E77584',
+        isHover: false,
+        text: 'Marketing & Patientenakquise'
+      },
+      {
+        start: 270,
+        end: 349,
+        color: '#F4B6BE',
+        hoverColor: '#F4B6BE',
+        isHover: false,
+        text: "Starke Markenfuhrung"
+      }
+    ];
+
+    const stage = new Konva.Stage({
+      container: 'lukaCircularCanvas',
+      width: 600,
+      height: 600,
+    });
+
+    const layer = new Konva.Layer();
+    stage.add(layer);
+
+    let angle = 0;
+    for(let i = 0; i < outerStrings.length ; i ++) {
+      const text = outerStrings[i];
+
+
+      for(let j = 0; j < text.length; j++) {
+        angle += outerAnglePerChar;
+
+        const x = cx + (outerRadius - outerThickness / 2) * Math.cos(angle);
+        const y = cy + (outerRadius - outerThickness / 2) * Math.sin(angle);
+
+        const char = new Konva.Text({
+          x: x,
+          y: y,
+          text: text[j],
+          fontSize: 16,
+          fontFamily: 'Arial',
+          fill: '#87603A',
+        });
+
+        char.offsetX(char.width() / 2);
+        char.offsetY(char.height() / 2);
+        char.rotation((angle * 180 / Math.PI) + 90);
+  
+        layer.add(char);
+      }
+
+      // ctx.beginPath();
+      // ctx.arc(cx, cy, outerRadius, angle + outerArcAngle * 2 / 5, angle + outerArcAngle, false);
+      // ctx.arc(cx, cy, outerRadius - outerThickness, angle + outerArcAngle, angle + outerArcAngle * 2 / 5, true);
+      // ctx.closePath();
+
+      // ctx.fillStyle = '#F6EDDE';
+      // ctx.fill();
+
+      angle += outerArcAngle;
+    }
+    
+    arcs.map(arc => {
+      const arcGroup = new Konva.Group();
+      layer.add(arcGroup);
+
+      const btn = new Konva.Arc({
+        x: cx,
+        y: cy,
+        innerRadius: baseRadius - thickness,
+        outerRadius: baseRadius,
+        angle: arc.end - arc.start,
+        rotation: arc.start,
+        fill: arc.color,
+        listening: true,
+      });
+      arcGroup.add(btn);
+
+      const chars = [];
+
+      const text = arc.text;
+      const textRadius = baseRadius - thickness / 2;
+      const startAngleRad = (Math.PI / 180) * (arc.start + 10);
+      const endAngleRad = (Math.PI / 180) * (arc.end - 10);
+      const totalAngle = endAngleRad - startAngleRad;
+      const charAngle = totalAngle / (text.length - 1);
+
+      console.log(charAngle);
+
+      for (let i = 0; i < text.length; i++) {
+        const angle = startAngleRad + i * charAngle;
+        const x = cx + textRadius * Math.cos(angle);
+        const y = cy + textRadius * Math.sin(angle);
+  
+        const char = new Konva.Text({
+          x: x,
+          y: y,
+          text: text[i],
+          fontSize: 16,
+          fontFamily: 'Arial',
+          fill: '#fff',
+        });
+  
+        char.offsetX(char.width() / 2);
+        char.offsetY(char.height() / 2);
+        char.rotation((angle * 180 / Math.PI) + 90);
+  
+        arcGroup.add(char);
+        chars.push(char);
+      }
+      
+      arcGroup.on('mouseenter', () => {
+        // btn.fill('#FF6666');
+        btn.to({
+          innerRadius: baseRadius - thickness + offset,
+          outerRadius: baseRadius + offset,
+          duration: 0.1,
+          easing: Konva.Easings.EaseInOutBack,
+        });
+
+        const newRadius = baseRadius + offset - thickness / 2;
+        
+        chars.forEach((char, i) => {
+          const angle = startAngleRad + i * charAngle;
+          const newX = cx + newRadius * Math.cos(angle);
+          const newY = cy + newRadius * Math.sin(angle);
+
+          char.to({
+            x: newX,
+            y: newY,
+            scaleX: 1.2,
+            scaleY: 1.2,
+            duration: 0.1,
+            easing: Konva.Easings.EaseInOutBack,
+          });
+        });
+
+        document.body.style.cursor = 'pointer';
+      });
+  
+      arcGroup.on('mouseleave', () => {
+        const defaultRadius = baseRadius - thickness / 2;
+
+        btn.to({
+          innerRadius: baseRadius - thickness,
+          outerRadius: baseRadius,
+          duration: 0.1,
+          easing: Konva.Easings.EaseInOutBack,
+        });
+        
+        chars.forEach((char, i) => {
+          const angle = startAngleRad + i * charAngle;
+          const origX = cx + defaultRadius * Math.cos(angle);
+          const origY = cy + defaultRadius * Math.sin(angle);
+          char.to({
+            x: origX,
+            y: origY,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 0.1,
+            easing: Konva.Easings.EaseInOutBack,
+          });
+        });
+      });
+    
+      return btn;
+    });
+
+    layer.draw();
+
+  </script>
+</body>
+</html>

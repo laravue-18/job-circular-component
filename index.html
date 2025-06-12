@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Circular Component</title>
+
   <link rel="stylesheet" href="font.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <style>
     body {
@@ -32,143 +36,251 @@
 </head>
 <body>
   <div class="luka-circular-component">
-    <div id="lukaCircularCanvas"></div>
+    <canvas id="lukaCircularCanvas" width="600" height="600"></canvas>
     <div class="center-content"></div>
   </div>
+
+<script>
+
+  const cx = 300, cy = 300;
+  const outerRadius = 232;
+  const outer = { radius: outerRadius };
+  const outerThickness = 12;
+  const outerTextColor = '#87603A';
+  const outerAnglePerChar = 11 / 230;
+  const outerStrings = ['HR & Team', 'Akademie', 'Labor', 'Abrechnung', 'Praxisausstattung', 'Finanzierung', 'Bewerbungsmanagement'];
+  const outerArcAngle = 78 / 230;
+
+  const baseRadius = 210;
+  const thickness = 60;
+  const offset = 30;
+  const anglePerChar = 10 / 180; // font-size(width) / radius
   
-  <script src="https://unpkg.com/konva@9/konva.min.js"></script>
-  <script>
-    const cx = 300, cy = 300;
-    const outerRadius = 232;
-    const outerThickness = 12;
-    const outerAnglePerChar = 11 / 230;
-    const outerStrings = ['HR & Team', 'Akademie', 'Labor', 'Abrechnung', 'Praxisausstattung', 'Finanzierung', 'Bewerbungsmanagement'];
-    const outerArcAngle = 78 / 230;
+  const arcs = [
+    {
+      start: Math.PI * 0 / 6,
+      end: Math.PI * 2.35 / 6,
+      color: '#E9A2AB',
+      hoverColor: '#E9A2AB',
+      isHover: false,
+      text: "Mitarbeiter schulen",
+      animatedRadius: baseRadius
+    },
+    {
+      start: Math.PI * 2.4 / 6,
+      end: Math.PI * 5.65 / 6,
+      color: '#DD8E98',
+      hoverColor: '#DD8E98',
+      isHover: false,
+      text: 'Buchha I tung und Finanzen',
+      animatedRadius: baseRadius
+    },
+    {
+      start: Math.PI * 5.7 / 6,
+      end: Math.PI * 9.25 / 6,
+      color: '#E77584',
+      hoverColor: '#E77584',
+      isHover: false,
+      text: 'Marketing & Patientenakquise',
+      animatedRadius: baseRadius
+    },
+    {
+      start: Math.PI * 9.3 / 6,
+      end: Math.PI * 11.95 / 6,
+      color: '#F4B6BE',
+      hoverColor: '#F4B6BE',
+      isHover: false,
+      text: "Starke Markenfuhrung",
+      animatedRadius: baseRadius
+    }
+  ];
 
-    const baseRadius = 210;
-    const thickness = 60;
-    const offset = 4;
-    const anglePerChar = 10 / 180; // font-size(width) / radius
-    
-    const arcs = [
-      {
-        start: -10,
-        end: 66,
-        color: '#E9A2AB',
-        hoverColor: '#E9A2AB',
-        isHover: false,
-        text: "Mitarbeiter schulen"
-      },
-      {
-        start: 67,
-        end: 165,
-        color: '#DD8E98',
-        hoverColor: '#DD8E98',
-        isHover: false,
-        text: 'Buchha I tung und Finanzen'
-      },
-      {
-        start: 166,
-        end: 269,
-        color: '#E77584',
-        hoverColor: '#E77584',
-        isHover: false,
-        text: 'Marketing & Patientenakquise'
-      },
-      {
-        start: 270,
-        end: 349,
-        color: '#F4B6BE',
-        hoverColor: '#F4B6BE',
-        isHover: false,
-        text: "Starke Markenfuhrung"
-      }
-    ];
+  const canvas = document.getElementById('lukaCircularCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.font = "bold 14px 'Arial', sans-serif"; // [font-style] [font-variant] [font-weight] font-size[/line-height] font-family
+  ctx.textBaseline = 'middle';
 
-    const stage = new Konva.Stage({
-      container: 'lukaCircularCanvas',
-      width: 600,
-      height: 600,
-    });
+  let isHover = false;
 
-    const layer = new Konva.Layer();
-    stage.add(layer);
+  function drawArc(radius, thickness, start, end, color) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, start, end, false);
+    ctx.arc(cx, cy, radius - thickness, end, start, true);
+    ctx.closePath();
 
-    const baseInnerRadius = 150;
-    const baseOuterRadius = 180;
-    const startAngleDeg = 45;
-    const endAngleDeg = 135;
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
 
-    const buttons = arcs.map(arc => {
-      const btn = new Konva.Arc({
-        x: cx,
-        y: cy,
-        innerRadius: baseRadius - thickness,
-        outerRadius: baseRadius,
-        angle: arc.end - arc.start,
-        rotation: arc.start,
-        fill: arc.color,
-        listening: true,
-      });
-      layer.add(btn);
+  function drawText(text, radius, start, anglePerChar, color) {
+    // const radius = arc.isHover ? baseRadius + offset - thickness / 2 : baseRadius - thickness / 2;
+    // const text = arc.text;
+    // const textLength = text.length;
 
-      const text = arc.text;
-      const textRadius = baseRadius - thickness / 2;
-      const startAngleRad = (Math.PI / 180) * (arc.start + 10);
-      const endAngleRad = (Math.PI / 180) * (arc.end - 10);
-      const totalAngle = endAngleRad - startAngleRad;
-      const charAngle = totalAngle / (text.length - 1);
+    // ctx.font = '14px Arial';
+    // ctx.fillStyle = 'white';
+    // ctx.textBaseline = 'middle';
 
-      console.log(charAngle);
-
-      for (let i = 0; i < text.length; i++) {
-        const angle = startAngleRad + i * charAngle;
-        const x = cx + textRadius * Math.cos(angle);
-        const y = cy + textRadius * Math.sin(angle);
-  
-        const char = new Konva.Text({
-          x: x,
-          y: y,
-          text: text[i],
-          fontSize: 16,
-          fontFamily: 'Arial',
-          fill: '#fff',
-        });
-  
-        char.offsetX(char.width() / 2);
-        char.offsetY(char.height() / 2);
-        char.rotation((angle * 180 / Math.PI) + 90);
-  
-        layer.add(char);
-      }
+    // for(let i = 0; i < textLength; i++) {
+    //   const char = text[i];
       
-      btn.on('mouseenter', () => {
-        // btn.fill('#FF6666');
-        btn.to({
-          innerRadius: baseRadius - thickness + 10,
-          outerRadius: baseRadius + 30,
-          duration: 0.3,
-        });
-        document.body.style.cursor = 'pointer';
-      });
-  
-      btn.on('mouseleave', () => {
-        // btn.fill('#E77584');
-        btn.to({
-          innerRadius: baseRadius - thickness,
-          outerRadius: baseRadius,
-          duration: 0.3,
-        });
-        document.body.style.cursor = 'default';
-      });
+    //   const angle = (arc.start + arc.end - anglePerChar * textLength ) / 2 + i * anglePerChar;
+      
+    //   const x = cx + radius * Math.cos(angle);
+    //   const y = cy + radius * Math.sin(angle);
+      
+    //   ctx.save();
+      
+    //   ctx.translate(x, y);
+    //   ctx.rotate(angle + Math.PI / 2);
+      
+    //   ctx.fillText(char, 0, 0);
+      
+    //   ctx.restore();
+    // }
+
+    const textLength = text.length;
+
+    ctx.font = '14px Arial';
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'middle';
+
+    for(let i = 0; i < textLength; i++) {
+      const char = text[i];
+      
+      const angle = start + i * anglePerChar;
+      
+      const x = cx + radius * Math.cos(angle);
+      const y = cy + radius * Math.sin(angle);
+      
+      ctx.save();
+      
+      ctx.translate(x, y);
+      ctx.rotate(angle + Math.PI / 2);
+      
+      ctx.fillText(char, 0, 0);
+      
+      ctx.restore();
+    }
+  }
+
+  function drawAllArcs() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-      return btn;
+    let outerStart = 0;
+
+    for(let i = 0; i < outerStrings.length ; i ++) {
+      const text = outerStrings[i];
+      drawText(outerStrings[i], outer.radius - outerThickness / 2, outerStart, outerAnglePerChar, outerTextColor);
+      outerStart += outerAnglePerChar * text.length ;
+      drawArc(outer.radius, outerThickness, outerStart + outerAnglePerChar , outerStart + outerArcAngle - outerAnglePerChar, '#F6EDDE');
+      outerStart += outerArcAngle;
+    }
+
+    arcs.forEach((arc) => {
+      const radius = arc.isHover ? baseRadius + offset : baseRadius;
+      drawArc(arc.animatedRadius, thickness, arc.start, arc.end, arc.color);
+    });
+    arcs.forEach((arc) => {
+      const radius = arc.animatedRadius - thickness / 2;
+      const start = (arc.start + arc.end - anglePerChar * arc.text.length ) / 2 ;
+      drawText(arc.text, radius, start, anglePerChar, '#fff');
+    });
+  
+  }
+
+  function isPointInArc(mx, my, arc) {
+    const dx = mx - cx;
+    const dy = my - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const radius = baseRadius;
+
+    if (dist < radius && dist > radius - thickness) {
+      let angle = Math.atan2(dy, dx);
+      if (angle < 0) angle += Math.PI * 2;
+
+      if (angle >= arc.start && angle <= arc.end) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    let changed = false;
+
+    arcs.forEach(arc => {
+      const wasHover = arc.isHover;
+      arc.isHover = isPointInArc(mx, my, arc);
+      if (arc.isHover !== wasHover) {
+        changed = true;
+
+        const targetRadius = arc.isHover ? baseRadius + offset : baseRadius;
+        const anyHover = arcs.some(a => a.isHover);
+        const targetOuterRadius = outerRadius + (anyHover ? offset : 0);
+
+        gsap.to(arc, {
+          duration: 0.2,
+          animatedRadius: targetRadius,
+          onUpdate: drawAllArcs
+        });
+
+        gsap.to(outer, {
+          duration: 0.2,
+          radius: targetOuterRadius,
+          onUpdate: drawAllArcs
+        });
+      }
     });
 
+    // if (!changed) drawAllArcs();
+  });
+
+  drawAllArcs();
 
 
-    layer.draw();
+//   let outer = { radius: outerRadius };
+// let targetOuterRadius = outerRadius;
+// let animationFrameId = null;
 
-  </script>
+// function animate() {
+//   const speed = 0.1; // 0.1 ~ 1.0 사이의 값 (속도 조절)
+//   const diff = targetOuterRadius - outer.radius;
+//   if (Math.abs(diff) < 0.5) {
+//     outer.radius = targetOuterRadius;
+//     cancelAnimationFrame(animationFrameId);
+//     animationFrameId = null;
+//   } else {
+//     outer.radius += diff * speed;
+//     animationFrameId = requestAnimationFrame(animate);
+//   }
+//   drawAllArcs();
+// }
+
+// canvas.addEventListener('mousemove', (e) => {
+//   const rect = canvas.getBoundingClientRect();
+//   const mx = e.clientX - rect.left;
+//   const my = e.clientY - rect.top;
+
+//   let anyHover = false;
+//   arcs.forEach(arc => {
+//     arc.isHover = isPointInArc(mx, my, arc);
+//     if (arc.isHover) anyHover = true;
+//   });
+
+//   targetOuterRadius = anyHover ? outerRadius + offset : outerRadius;
+
+//   if (!animationFrameId) {
+//     animationFrameId = requestAnimationFrame(animate);
+//   }
+// });
+
+</script>
+
 </body>
 </html>
+
