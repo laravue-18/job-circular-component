@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Circular Component</title>
-
   <link rel="stylesheet" href="font.css">
 
   <style>
@@ -34,188 +32,143 @@
 </head>
 <body>
   <div class="luka-circular-component">
-    <canvas id="lukaCircularCanvas" width="600" height="600"></canvas>
+    <div id="lukaCircularCanvas"></div>
     <div class="center-content"></div>
   </div>
-
-<script>
-
-  const cx = 300, cy = 300;
-  const outerRadius = 232;
-  const outerThickness = 12;
-  const outerAnglePerChar = 11 / 230;
-  const outerStrings = ['HR & Team', 'Akademie', 'Labor', 'Abrechnung', 'Praxisausstattung', 'Finanzierung', 'Bewerbungsmanagement'];
-  const outerArcAngle = 78 / 230;
-
-  const baseRadius = 210;
-  const thickness = 60;
-  const offset = 4;
-  const anglePerChar = 10 / 180; // font-size(width) / radius
   
-  const arcs = [
-    {
-      start: Math.PI * 0 / 6,
-      end: Math.PI * 2.35 / 6,
-      color: '#E9A2AB',
-      hoverColor: '#E9A2AB',
-      isHover: false,
-      text: "Mitarbeiter schulen"
-    },
-    {
-      start: Math.PI * 2.4 / 6,
-      end: Math.PI * 5.65 / 6,
-      color: '#DD8E98',
-      hoverColor: '#DD8E98',
-      isHover: false,
-      text: 'Buchha I tung und Finanzen'
-    },
-    {
-      start: Math.PI * 5.7 / 6,
-      end: Math.PI * 9.25 / 6,
-      color: '#E77584',
-      hoverColor: '#E77584',
-      isHover: false,
-      text: 'Marketing & Patientenakquise'
-    },
-    {
-      start: Math.PI * 9.3 / 6,
-      end: Math.PI * 11.95 / 6,
-      color: '#F4B6BE',
-      hoverColor: '#F4B6BE',
-      isHover: false,
-      text: "Starke Markenfuhrung"
-    }
-  ];
+  <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+  <script>
+    const cx = 300, cy = 300;
+    const outerRadius = 232;
+    const outerThickness = 12;
+    const outerAnglePerChar = 11 / 230;
+    const outerStrings = ['HR & Team', 'Akademie', 'Labor', 'Abrechnung', 'Praxisausstattung', 'Finanzierung', 'Bewerbungsmanagement'];
+    const outerArcAngle = 78 / 230;
 
-  const canvas = document.getElementById('lukaCircularCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.font = "bold 14px 'Arial', sans-serif"; // [font-style] [font-variant] [font-weight] font-size[/line-height] font-family
-  ctx.textBaseline = 'middle';
-
-  function drawArc(arc) {
-    const radius = arc.isHover ? baseRadius + offset : baseRadius;
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, arc.start, arc.end, false);
-    ctx.arc(cx, cy, radius - thickness, arc.end, arc.start, true);
-    ctx.closePath();
-
-    ctx.fillStyle = arc.isHover ? arc.hoverColor : arc.color;
-    ctx.fill();
-  }
-
-  function drawText(arc) {
-    const radius = arc.isHover ? baseRadius + offset - thickness / 2 : baseRadius - thickness / 2;
-    const text = arc.text;
-    const textLength = text.length;
-
-    ctx.font = '14px Arial';
-    ctx.fillStyle = 'white';
-    ctx.textBaseline = 'middle';
-
-    for(let i = 0; i < textLength; i++) {
-      const char = text[i];
-      
-      const angle = (arc.start + arc.end - anglePerChar * textLength ) / 2 + i * anglePerChar;
-      
-      const x = cx + radius * Math.cos(angle);
-      const y = cy + radius * Math.sin(angle);
-      
-      ctx.save();
-      
-      ctx.translate(x, y);
-      ctx.rotate(angle + Math.PI / 2);
-      
-      ctx.fillText(char, 0, 0);
-      
-      ctx.restore();
-    }
-  }
-
-  function drawAllArcs() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    const baseRadius = 210;
+    const thickness = 60;
+    const offset = 4;
+    const anglePerChar = 10 / 180; // font-size(width) / radius
     
-    ctx.font = '14px Arial';
-    ctx.textBaseline = 'middle';
-
-    let angle = 0;
-
-    for(let i = 0; i < outerStrings.length ; i ++) {
-      const text = outerStrings[i];
-
-      for(let j = 0; j < text.length; j++) {
-        const char = text[j];
-
-        angle += outerAnglePerChar;
-
-        const x = cx + (outerRadius - outerThickness / 2) * Math.cos(angle);
-        const y = cy + (outerRadius - outerThickness / 2) * Math.sin(angle);
-
-        ctx.fillStyle = '#87603A';
-
-        ctx.save();
-
-        ctx.translate(x, y);
-        ctx.rotate(angle + Math.PI / 2);
-
-        ctx.fillText(char, 0, 0);
-      
-        ctx.restore();
+    const arcs = [
+      {
+        start: -10,
+        end: 66,
+        color: '#E9A2AB',
+        hoverColor: '#E9A2AB',
+        isHover: false,
+        text: "Mitarbeiter schulen"
+      },
+      {
+        start: 67,
+        end: 165,
+        color: '#DD8E98',
+        hoverColor: '#DD8E98',
+        isHover: false,
+        text: 'Buchha I tung und Finanzen'
+      },
+      {
+        start: 166,
+        end: 269,
+        color: '#E77584',
+        hoverColor: '#E77584',
+        isHover: false,
+        text: 'Marketing & Patientenakquise'
+      },
+      {
+        start: 270,
+        end: 349,
+        color: '#F4B6BE',
+        hoverColor: '#F4B6BE',
+        isHover: false,
+        text: "Starke Markenfuhrung"
       }
+    ];
 
-      ctx.beginPath();
-      ctx.arc(cx, cy, outerRadius, angle + outerArcAngle * 2 / 5, angle + outerArcAngle, false);
-      ctx.arc(cx, cy, outerRadius - outerThickness, angle + outerArcAngle, angle + outerArcAngle * 2 / 5, true);
-      ctx.closePath();
-
-      ctx.fillStyle = '#F6EDDE';
-      ctx.fill();
-
-      angle += outerArcAngle;
-    }
-
-    arcs.forEach(drawArc);
-    arcs.forEach(drawText);
-  
-  }
-
-  function isPointInArc(mx, my, arc) {
-    const dx = mx - cx;
-    const dy = my - cy;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const radius = baseRadius;
-
-    if (dist < radius && dist > radius - thickness) {
-      let angle = Math.atan2(dy, dx);
-      if (angle < 0) angle += Math.PI * 2;
-
-      if (angle >= arc.start && angle <= arc.end) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-
-    let changed = false;
-
-    arcs.forEach(arc => {
-      const wasHover = arc.isHover;
-      arc.isHover = isPointInArc(mx, my, arc);
-      if (arc.isHover !== wasHover) changed = true;
+    const stage = new Konva.Stage({
+      container: 'lukaCircularCanvas',
+      width: 600,
+      height: 600,
     });
 
-    if (changed) drawAllArcs();
-  });
+    const layer = new Konva.Layer();
+    stage.add(layer);
 
-  drawAllArcs();
-</script>
+    const baseInnerRadius = 150;
+    const baseOuterRadius = 180;
+    const startAngleDeg = 45;
+    const endAngleDeg = 135;
 
+    const buttons = arcs.map(arc => {
+      const btn = new Konva.Arc({
+        x: cx,
+        y: cy,
+        innerRadius: baseRadius - thickness,
+        outerRadius: baseRadius,
+        angle: arc.end - arc.start,
+        rotation: arc.start,
+        fill: arc.color,
+        listening: true,
+      });
+      layer.add(btn);
+
+      const text = arc.text;
+      const textRadius = baseRadius - thickness / 2;
+      const startAngleRad = (Math.PI / 180) * (arc.start + 10);
+      const endAngleRad = (Math.PI / 180) * (arc.end - 10);
+      const totalAngle = endAngleRad - startAngleRad;
+      const charAngle = totalAngle / (text.length - 1);
+
+      console.log(charAngle);
+
+      for (let i = 0; i < text.length; i++) {
+        const angle = startAngleRad + i * charAngle;
+        const x = cx + textRadius * Math.cos(angle);
+        const y = cy + textRadius * Math.sin(angle);
+  
+        const char = new Konva.Text({
+          x: x,
+          y: y,
+          text: text[i],
+          fontSize: 16,
+          fontFamily: 'Arial',
+          fill: '#fff',
+        });
+  
+        char.offsetX(char.width() / 2);
+        char.offsetY(char.height() / 2);
+        char.rotation((angle * 180 / Math.PI) + 90);
+  
+        layer.add(char);
+      }
+      
+      btn.on('mouseenter', () => {
+        // btn.fill('#FF6666');
+        btn.to({
+          innerRadius: baseRadius - thickness + 10,
+          outerRadius: baseRadius + 30,
+          duration: 0.3,
+        });
+        document.body.style.cursor = 'pointer';
+      });
+  
+      btn.on('mouseleave', () => {
+        // btn.fill('#E77584');
+        btn.to({
+          innerRadius: baseRadius - thickness,
+          outerRadius: baseRadius,
+          duration: 0.3,
+        });
+        document.body.style.cursor = 'default';
+      });
+    
+      return btn;
+    });
+
+
+
+    layer.draw();
+
+  </script>
 </body>
 </html>
-

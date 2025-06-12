@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pixi Arc Text</title>
+  <style>
+    body { margin: 0; background: #111; }
+    canvas { display: block; margin: auto; }
+  </style>
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.0/pixi.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<script>
+  const app = new PIXI.Application({
+    width: 500,
+    height: 500,
+    backgroundColor: 0x1e1e1e,
+    antialias: true,
+  });
+  document.body.appendChild(app.view);
+
+  const centerX = 250;
+  const centerY = 250;
+  const baseRadius = 180;
+  const thickness = 30;
+  const startAngle = Math.PI * 0.25;
+  const endAngle = Math.PI * 0.75;
+
+  // ====== Arc Graphics ======
+  const arc = new PIXI.Graphics();
+  drawArc(arc, baseRadius, thickness, 0xE77584);
+  arc.interactive = true;
+  arc.cursor = 'pointer';
+  app.stage.addChild(arc);
+
+  function drawArc(graphics, radius, thickness, color) {
+    graphics.clear();
+    graphics.beginFill(color);
+
+    graphics.moveTo(
+      centerX + radius * Math.cos(startAngle),
+      centerY + radius * Math.sin(startAngle)
+    );
+    graphics.arc(centerX, centerY, radius, startAngle, endAngle);
+    graphics.arc(centerX, centerY, radius - thickness, endAngle, startAngle, true);
+    graphics.closePath();
+    graphics.endFill();
+  }
+
+  // ====== Arc Hover Animation ======
+  arc.on('pointerover', () => {
+    gsap.to(arc, {
+      pixi: {},
+      duration: 0.3,
+      onUpdate: () => {
+        drawArc(arc, baseRadius + 10, thickness + 5, 0xFF6666);
+      }
+    });
+  });
+
+  arc.on('pointerout', () => {
+    gsap.to(arc, {
+      pixi: {},
+      duration: 0.3,
+      onUpdate: () => {
+        drawArc(arc, baseRadius, thickness, 0xE77584);
+      }
+    });
+  });
+
+  // ====== Arc Text ======
+  const text = "텍스트 따라가기";
+  const chars = text.split('');
+  const totalAngle = endAngle - startAngle;
+  const angleStep = totalAngle / (chars.length - 1);
+  const textRadius = baseRadius - thickness / 2;
+
+  chars.forEach((char, i) => {
+    const angle = startAngle + i * angleStep;
+    const x = centerX + textRadius * Math.cos(angle);
+    const y = centerY + textRadius * Math.sin(angle);
+    const textEl = new PIXI.Text(char, {
+      fontFamily: 'Arial',
+      fontSize: 16,
+      fill: 0xffffff,
+      align: 'center',
+    });
+    textEl.anchor.set(0.5);
+    textEl.x = x;
+    textEl.y = y;
+    textEl.rotation = angle + Math.PI / 2;
+    app.stage.addChild(textEl);
+  });
+</script>
+
+</body>
+</html>

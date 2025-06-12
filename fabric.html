@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Fabric.js Arc + Text</title>
+  <style>
+    body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    canvas { border: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <canvas id="c" width="500" height="500"></canvas>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script>
+    const canvas = new fabric.Canvas('c', {
+      backgroundColor: '#1e1e1e',
+    });
+
+    const cx = 250, cy = 250;
+    let radius = 150;
+    const thickness = 30;
+    const startAngle = Math.PI * 0.25;
+    const endAngle = Math.PI * 0.75;
+
+    // Arc Shape (Using Path)
+    function createArc(radius, color = '#E77584') {
+      const outerStart = {
+        x: cx + radius * Math.cos(startAngle),
+        y: cy + radius * Math.sin(startAngle)
+      };
+      const outerEnd = {
+        x: cx + radius * Math.cos(endAngle),
+        y: cy + radius * Math.sin(endAngle)
+      };
+      const innerRadius = radius - thickness;
+
+      const innerStart = {
+        x: cx + innerRadius * Math.cos(endAngle),
+        y: cy + innerRadius * Math.sin(endAngle)
+      };
+      const innerEnd = {
+        x: cx + innerRadius * Math.cos(startAngle),
+        y: cy + innerRadius * Math.sin(startAngle)
+      };
+
+      const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
+
+      const path = `
+        M ${outerStart.x} ${outerStart.y}
+        A ${radius} ${radius} 0 ${largeArcFlag} 1 ${outerEnd.x} ${outerEnd.y}
+        L ${innerStart.x} ${innerStart.y}
+        A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${innerEnd.x} ${innerEnd.y}
+        Z
+      `;
+
+      const arcPath = new fabric.Path(path, {
+        fill: color,
+        selectable: false,
+        hoverCursor: 'pointer',
+        originX: 'center',
+        originY: 'center',
+      });
+
+      arcPath.left = cx;
+      arcPath.top = cy;
+
+      return arcPath;
+    }
+
+    let arc = createArc(radius);
+    canvas.add(arc);
+
+    // Arc hover effect
+    arc.on('mouseover', () => {
+      gsap.to(arc, {
+        duration: 0.3,
+        onUpdate: () => {
+          canvas.remove(arc);
+          arc = createArc(radius + 10, '#FF6666');
+          arc.on('mouseover', () => {}); // 재귀
+          arc.on('mouseout', () => {});
+          canvas.add(arc);
+          canvas.sendToBack(arc);
+        }
+      });
+    });
+
+    arc.on('mouseout', () => {
+      gsap.to(arc, {
+        duration: 0.3,
+        onUpdate: () => {
+          canvas.remove(arc);
+          arc = createArc(radius, '#E77584');
+          arc.on('mouseover', () => {});
+          arc.on('mouseout', () => {});
+          canvas.add(arc);
+          canvas.sendToBack(arc);
+        }
+      });
+    });
+
+    // Text on Arc (basic position)
+    const text = "텍스트를 원호에 배치합니다";
+    const angleStep = (endAngle - startAngle) / (text.length - 1);
+    const textRadius = radius - thickness / 2;
+
+    text.split('').forEach((char, i) => {
+      const angle = startAngle + angleStep * i;
+      const x = cx + textRadius * Math.cos(angle);
+      const y = cy + textRadius * Math.sin(angle);
+
+      const charObj = new fabric.Text(char, {
+        left: x,
+        top: y,
+        fill: '#fff',
+        fontSize: 16,
+        originX: 'center',
+        originY: 'center',
+        angle: angle * 180 / Math.PI + 90
+      });
+
+      canvas.add(charObj);
+    });
+  </script>
+</body>
+</html>
