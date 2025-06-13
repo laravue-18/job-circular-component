@@ -44,17 +44,17 @@
 
   const cx = 300, cy = 300;
   const outerRadius = 232;
-  const outer = { radius: outerRadius };
+  const outer = { radius: outerRadius, start: 0 };
   const outerThickness = 12;
   const outerTextColor = '#87603A';
   const outerAnglePerChar = 11 / 230;
   const outerStrings = ['HR & Team', 'Akademie', 'Labor', 'Abrechnung', 'Praxisausstattung', 'Finanzierung', 'Bewerbungsmanagement'];
-  const outerArcAngle = 78 / 230;
+  const outerArcAngle = 96 / 230;
 
   const baseRadius = 210;
   const thickness = 60;
   const offset = 30;
-  const anglePerChar = 10 / 180; // font-size(width) / radius
+  const anglePerChar = 10 / 200; // font-size(width) / radius
   
   const arcs = [
     {
@@ -116,67 +116,45 @@
     ctx.fill();
   }
 
-  function drawText(text, radius, start, anglePerChar, color) {
-    // const radius = arc.isHover ? baseRadius + offset - thickness / 2 : baseRadius - thickness / 2;
-    // const text = arc.text;
-    // const textLength = text.length;
-
-    // ctx.font = '14px Arial';
-    // ctx.fillStyle = 'white';
-    // ctx.textBaseline = 'middle';
-
-    // for(let i = 0; i < textLength; i++) {
-    //   const char = text[i];
-      
-    //   const angle = (arc.start + arc.end - anglePerChar * textLength ) / 2 + i * anglePerChar;
-      
-    //   const x = cx + radius * Math.cos(angle);
-    //   const y = cy + radius * Math.sin(angle);
-      
-    //   ctx.save();
-      
-    //   ctx.translate(x, y);
-    //   ctx.rotate(angle + Math.PI / 2);
-      
-    //   ctx.fillText(char, 0, 0);
-      
-    //   ctx.restore();
-    // }
+  function drawText(text, radius, start, anglePerChar, color, letterSpacing = 1.1) {
+    // await document.fonts.load('14px Arial');
 
     const textLength = text.length;
+    let angle = start;
 
-    ctx.font = '14px Arial';
+    ctx.font = 'bold 14px Arial';
     ctx.fillStyle = color;
     ctx.textBaseline = 'middle';
 
     for(let i = 0; i < textLength; i++) {
       const char = text[i];
-      
-      const angle = start + i * anglePerChar;
-      
+      const charWidth = ctx.measureText(char).width;
+
       const x = cx + radius * Math.cos(angle);
       const y = cy + radius * Math.sin(angle);
       
       ctx.save();
-      
+
       ctx.translate(x, y);
       ctx.rotate(angle + Math.PI / 2);
-      
       ctx.fillText(char, 0, 0);
       
       ctx.restore();
+
+      angle += charWidth * letterSpacing / baseRadius;
     }
+
+    return angle;
   }
 
   function drawAllArcs() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    let outerStart = 0;
+    let outerStart = outer.start;
 
     for(let i = 0; i < outerStrings.length ; i ++) {
       const text = outerStrings[i];
-      drawText(outerStrings[i], outer.radius - outerThickness / 2, outerStart, outerAnglePerChar, outerTextColor);
-      outerStart += outerAnglePerChar * text.length ;
+      outerStart = drawText(outerStrings[i], outer.radius - outerThickness / 2, outerStart, outerAnglePerChar, outerTextColor);
       drawArc(outer.radius, outerThickness, outerStart + outerAnglePerChar , outerStart + outerArcAngle - outerAnglePerChar, '#F6EDDE');
       outerStart += outerArcAngle;
     }
@@ -188,7 +166,7 @@
     arcs.forEach((arc) => {
       const radius = arc.animatedRadius - arc.animatedThickness / 2;
       const start = (arc.start + arc.end - anglePerChar * arc.text.length ) / 2 ;
-      drawText(arc.text, radius, start, anglePerChar, '#fff');
+      drawText(arc.text, radius, start, anglePerChar, '#fff', 1.5);
     });
   
   }
@@ -227,63 +205,29 @@
         const targetThickness = arc.isHover ? thickness + 24 : thickness;
         const anyHover = arcs.some(a => a.isHover);
         const targetOuterRadius = outerRadius + (anyHover ? offset : 0);
+        const targetOuterStart = anyHover ? 0.5 : 0;
 
         gsap.to(arc, {
           duration: 0.2,
           animatedRadius: targetRadius,
           animatedThickness: targetThickness,
+          ease: "power2.out",
           onUpdate: drawAllArcs
         });
 
         gsap.to(outer, {
           duration: 0.2,
           radius: targetOuterRadius,
+          start: targetOuterStart,
+          ease: "power2.out",
           onUpdate: drawAllArcs
         });
       }
     });
 
-    // if (!changed) drawAllArcs();
   });
 
   drawAllArcs();
-
-
-//   let outer = { radius: outerRadius };
-// let targetOuterRadius = outerRadius;
-// let animationFrameId = null;
-
-// function animate() {
-//   const speed = 0.1; // 0.1 ~ 1.0 
-//   const diff = targetOuterRadius - outer.radius;
-//   if (Math.abs(diff) < 0.5) {
-//     outer.radius = targetOuterRadius;
-//     cancelAnimationFrame(animationFrameId);
-//     animationFrameId = null;
-//   } else {
-//     outer.radius += diff * speed;
-//     animationFrameId = requestAnimationFrame(animate);
-//   }
-//   drawAllArcs();
-// }
-
-// canvas.addEventListener('mousemove', (e) => {
-//   const rect = canvas.getBoundingClientRect();
-//   const mx = e.clientX - rect.left;
-//   const my = e.clientY - rect.top;
-
-//   let anyHover = false;
-//   arcs.forEach(arc => {
-//     arc.isHover = isPointInArc(mx, my, arc);
-//     if (arc.isHover) anyHover = true;
-//   });
-
-//   targetOuterRadius = anyHover ? outerRadius + offset : outerRadius;
-
-//   if (!animationFrameId) {
-//     animationFrameId = requestAnimationFrame(animate);
-//   }
-// });
 
 </script>
 
