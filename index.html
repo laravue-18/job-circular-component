@@ -64,7 +64,8 @@
       hoverColor: '#E9A2AB',
       isHover: false,
       text: "Mitarbeiter schulen",
-      animatedRadius: baseRadius
+      animatedRadius: baseRadius,
+      animatedThickness: thickness
     },
     {
       start: Math.PI * 2.4 / 6,
@@ -73,7 +74,8 @@
       hoverColor: '#DD8E98',
       isHover: false,
       text: 'Buchha I tung und Finanzen',
-      animatedRadius: baseRadius
+      animatedRadius: baseRadius,
+      animatedThickness: thickness
     },
     {
       start: Math.PI * 5.7 / 6,
@@ -82,7 +84,8 @@
       hoverColor: '#E77584',
       isHover: false,
       text: 'Marketing & Patientenakquise',
-      animatedRadius: baseRadius
+      animatedRadius: baseRadius,
+      animatedThickness: thickness
     },
     {
       start: Math.PI * 9.3 / 6,
@@ -91,7 +94,8 @@
       hoverColor: '#F4B6BE',
       isHover: false,
       text: "Starke Markenfuhrung",
-      animatedRadius: baseRadius
+      animatedRadius: baseRadius,
+      animatedThickness: thickness
     }
   ];
 
@@ -179,10 +183,10 @@
 
     arcs.forEach((arc) => {
       const radius = arc.isHover ? baseRadius + offset : baseRadius;
-      drawArc(arc.animatedRadius, thickness, arc.start, arc.end, arc.color);
+      drawArc(arc.animatedRadius, arc.animatedThickness, arc.start, arc.end, arc.color);
     });
     arcs.forEach((arc) => {
-      const radius = arc.animatedRadius - thickness / 2;
+      const radius = arc.animatedRadius - arc.animatedThickness / 2;
       const start = (arc.start + arc.end - anglePerChar * arc.text.length ) / 2 ;
       drawText(arc.text, radius, start, anglePerChar, '#fff');
     });
@@ -220,12 +224,14 @@
         changed = true;
 
         const targetRadius = arc.isHover ? baseRadius + offset : baseRadius;
+        const targetThickness = arc.isHover ? thickness + 24 : thickness;
         const anyHover = arcs.some(a => a.isHover);
         const targetOuterRadius = outerRadius + (anyHover ? offset : 0);
 
         gsap.to(arc, {
           duration: 0.2,
           animatedRadius: targetRadius,
+          animatedThickness: targetThickness,
           onUpdate: drawAllArcs
         });
 
@@ -248,7 +254,7 @@
 // let animationFrameId = null;
 
 // function animate() {
-//   const speed = 0.1; // 0.1 ~ 1.0 사이의 값 (속도 조절)
+//   const speed = 0.1; // 0.1 ~ 1.0 
 //   const diff = targetOuterRadius - outer.radius;
 //   if (Math.abs(diff) < 0.5) {
 //     outer.radius = targetOuterRadius;
